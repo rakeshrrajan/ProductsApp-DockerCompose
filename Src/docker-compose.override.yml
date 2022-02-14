@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  productDb:
+    container_name: mongo_productDb
+    restart: always
+    ports:
+    - "27017:27017"
+    volumes:
+    - ./db_data:/src
+  productsapp.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DatabaseSettings:ConnectionString=mongodb://productDb:27017
+    depends_on:
+    - productDb
+    ports:
+    - "8000:80"
+  productsapp.ui:
+    environment:
+      - NODE_ENV=production
+      - apiUrl=http://productsapp.api/api/Product/GetProducts
+    ports:
+    - "8001:8001"
+    volumes:
+      - /src/ProductsApp-Ui/node_modules
+      - ./ProductsApp-Ui:/src
+      - /usr/share/nginx/html
